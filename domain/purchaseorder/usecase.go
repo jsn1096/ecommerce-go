@@ -1,0 +1,50 @@
+package purchaseorder
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/jsn1096/ecommerce/model"
+)
+
+// PurchaseOrder implements UseCase
+type PurchaseOrder struct {
+	storage Storage
+}
+
+// New returns a new PurchaseOrder
+func New(s Storage) PurchaseOrder {
+	return PurchaseOrder{storage: s}
+}
+
+// Create creates a model.PurchaseOrder
+func (p PurchaseOrder) Create(m *model.PurchaseOrder) error {
+	if err := m.Validate(); err != nil {
+		return fmt.Errorf("purchaseorder: %w", err)
+	}
+	// tarea: validar que el productID coincida con uno válido
+	ID, err := uuid.NewUUID()
+	if err != nil {
+		return fmt.Errorf("%s %w", "uuid.NewUUID()", err)
+	}
+
+	m.ID = ID
+	m.CreatedAt = time.Now().Unix()
+
+	err = p.storage.Create(m)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p PurchaseOrder) GetByID(ID uuid.UUID) (model.PurchaseOrder, error) {
+	purchaseOrder, err := p.storage.GetByID(ID)
+	if err != nil {
+		return model.PurchaseOrder{}, fmt.Errorf("purchaseorder: %w", err)
+	}
+
+	return purchaseOrder, nil
+}
