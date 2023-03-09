@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jsn1096/ecommerce/domain/user"
+	"github.com/jsn1096/ecommerce/infrastructure/handler/middle"
 	storageUser "github.com/jsn1096/ecommerce/infrastructure/postgres/user"
 	"github.com/labstack/echo/v4"
 )
@@ -10,7 +11,9 @@ import (
 func NewRouter(e *echo.Echo, dbPool *pgxpool.Pool) {
 	h := buildHandler(dbPool)
 
-	adminRoutes(e, h)
+	authMiddleware := middle.New()
+
+	adminRoutes(e, h, authMiddleware.IsValid, authMiddleware.IsAdmin)
 	publicRoutes(e, h)
 }
 
@@ -25,8 +28,8 @@ func buildHandler(dbPool *pgxpool.Pool) handler {
 
 // Construimos las rutas, publicas y administrativas
 // En el siguiente módulo vamos a añadirle los permisos
-func adminRoutes(e *echo.Echo, h handler) {
-	g := e.Group("/api/v1/admin/users")
+func adminRoutes(e *echo.Echo, h handler, middlewares ...echo.MiddlewareFunc) {
+	g := e.Group("/api/v1/admin/users", middlewares...)
 
 	g.GET("", h.GetAll)
 }

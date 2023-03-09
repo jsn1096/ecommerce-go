@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const table = "purchaseorders"
+const table = "purchase_orders"
 
 var fields = []string{
 	"id",

@@ -49,8 +49,19 @@ func (u User) Create(m *model.User) error {
 func (u User) GetByEmail(email string) (model.User, error) {
 	user, err := u.storage.GetByEmail(email)
 	if err != nil {
-		return model.User{}, err //fmt.Errorf("#{"storage.GetByEmail()"} #{err}")
+		return model.User{}, fmt.Errorf("%s %w", "storage.GetByEmail()", err)
 	}
+	return user, nil
+}
+
+func (u User) GetByID(ID uuid.UUID) (model.User, error) {
+	user, err := u.storage.GetByID(ID)
+	if err != nil {
+		return model.User{}, fmt.Errorf("user: %w", err)
+	}
+
+	user.Password = ""
+
 	return user, nil
 }
 
@@ -61,4 +72,17 @@ func (u User) GetAll() (model.Users, error) {
 	}
 
 	return users, nil
+}
+
+func (u User) Login(email, password string) (model.User, error) {
+	m, err := u.GetByEmail(email)
+	if err != nil {
+		return model.User{}, fmt.Errorf("%s %w", "user.GetByEmail()", err)
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(m.Password), []byte(password))
+	if err != nil {
+		return model.User{}, fmt.Errorf("%s %w", "bcrypt.CompareHashAndPassword()", err)
+	}
+	m.Password = ""
+	return m, nil
 }

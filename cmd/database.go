@@ -48,7 +48,13 @@ func newDBConection() (*pgxpool.Pool, error) {
 		}
 	}
 
+	// Obtenemos la url para conectarnos a la db
 	connString := makeURL(user, pass, host, port, dbName, sslMode, min, max)
+	// Si la conexión a la db requiere sslmode, tenemos que darle a esta url
+	// la ubicación del archivo de conexión
+	if os.Getenv("DB_SSL_MODE") == "require" {
+		connString += " sslrootcert=" + os.Getenv("DB_SSL_ROOT_CERT")
+	}
 	// Valida que la url esté correctamente formada
 	config, err := pgxpool.ParseConfig(connString)
 	if err != nil {

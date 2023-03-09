@@ -26,10 +26,10 @@ func (h handler) Create(c echo.Context) error {
 	if err := c.Bind(&m); err != nil {
 		return h.response.BindFailed(err)
 	}
-
+	// obtiene el userID del contexto que hemos validado con el token
 	userID, ok := c.Get("userID").(uuid.UUID)
 	if !ok {
-		return h.response.Error(c, "c.Get().(uuid.UUID)", errors.New("can´t parse uuid"))
+		return h.response.Error(c, "c.Get().(uuid.UUID)", errors.New("can't parse uuid"))
 	}
 
 	m.UserID = userID
